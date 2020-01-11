@@ -11,7 +11,9 @@ import cv2
 import base64
 from PIL import Image
 from dash.exceptions import PreventUpdate
-
+import urllib
+import cv2
+from urllib.request import urlopen
 import io
 from scipy import misc
 import imageio
@@ -35,10 +37,6 @@ search_bar = dbc.Row(
     className="ml-auto flex-nowrap mt-3 mt-md-0",
     align="center",
 )
-
-
-
-
 
 
 navbar = dbc.Navbar(
@@ -126,12 +124,21 @@ app.layout = html.Div(
             dbc.Row([
                 html.Div(id='output-container-button'),
                 html.Div(id='output-image-upload'), ], style={"width": '80%'}),
-                html.Div(id='body-div')
+            html.Div(id='body-div')
 
 
         ], style={'marginTop': 40, 'marginLeft': "10%"})
 
     ])
+
+# METHOD #1: OpenCV, NumPy, and urllib
+
+
+def url_to_image(url):
+    resp = urlopen(url)
+    image = np.asarray(bytearray(resp.read()), dtype="uint8")
+    image = cv2.imdecode(image, cv2.COLOR_BGR2HSV)
+    return image
 
 
 @app.callback(
@@ -140,22 +147,24 @@ app.layout = html.Div(
     [dash.dependencies.State('input-box', 'value')],
 )
 def update_output(n_clicks, value):
-    ii = cv2.imread("test11.png")
-    gray_image = cv2.cvtColor(ii, cv2.COLOR_BGR2GRAY)
-    plt.imshow(gray_image, cmap='Greys')
+    val = "{}".format(value)
+    ii = url_to_image(val)
+    lower_blue = np.array([0, 0, 0])
+    upper_blue = np.array([112, 122, 120])
+    gray_images = cv2.cvtColor(ii, cv2.COLOR_BGR2HSV)
+    gray_image = cv2.inRange(ii, lower_blue, upper_blue)
     width = int(28)
     height = int(28)
     dim = (width, height)
-    # resize image
     resized = cv2.resize(gray_image, dim, interpolation=cv2.INTER_AREA)
-    resized = resized / 255.0
-    image = resized.reshape(1, 28, 28, 1)
-    if (value == None):
+    resized = resized.astype('float32') / 255
+    resized = resized.reshape(1, 28, 28, 1)
+    if (value == None or value == "unknown"):
         return ''
     else:
         return html.Div([
-            # HTML images accept base64 encoded strings in the same format
-            html.Img(src="{}".format(value)),
+            html.Img(src="{}".format(val)),
+            f" {resized.shape}",
             html.Hr()])
 
 
@@ -213,10 +222,8 @@ def parse_contents(contents, filename, date):
                  html.Div(id='body-div')]
             ),
         ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '80%'})
-    ], style={"display":"flex","alignItems":"center","justifyContent":"center","width":"160%","minWidth":"700px"})
+    ], style={"display": "flex", "alignItems": "center", "justifyContent": "center", "width": "160%", "minWidth": "700px"})
 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-
