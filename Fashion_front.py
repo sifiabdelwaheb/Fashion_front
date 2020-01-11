@@ -35,32 +35,12 @@ search_bar = dbc.Row(
     className="ml-auto flex-nowrap mt-3 mt-md-0",
     align="center",
 )
-first_card = dbc.Card(
-    dbc.CardBody(
-        [
-            html.H5("Card title", className="card-title"),
-            html.P("This card has some text content, but not much else"),
-            dbc.Button("Go somewhere", color="primary"),
-        ]
-    )
-)
 
 
-second_card = dbc.Card(
-    dbc.CardBody(
-        [
-            html.H5("Card title", className="card-title"),
-            html.P(
-                "This card also has some text content and not much else, but "
-                "it is twice as wide as the first card."
-            ),
-            dbc.Button("Go somewhere", color="primary"),
-        ]
-    )
-)
 
 
-cards = dbc.Row([dbc.Col(first_card, width=4), dbc.Col(second_card, width=6)])
+
+
 navbar = dbc.Navbar(
     [
         html.A(
@@ -81,21 +61,10 @@ navbar = dbc.Navbar(
     color="dark",
     dark=True,
 )
-second_card = dbc.Card(
-    dbc.CardBody(
-        [
-            html.H5("Card title", className="card-title"),
-            html.P(
-                "This card also has some text content and not much else, but "
-                "it is twice as wide as the first card."
-            ),
-            dbc.Button("Go somewhere", color="primary"),
-        ]
-    )
-)
+
 badges = html.Span(
     [
-        dbc.Badge("or chose with", pill=True,
+        dbc.Badge("or choose with", pill=True,
                   color="light", className="mr-1"),
 
     ], style={'marginLeft': '30px', 'fontSize': '22px', 'marginRight': '30px'}
@@ -243,8 +212,8 @@ def parse_contents(contents, filename, date):
                  html.H5("Image Class:"),
                  html.Div(id='body-div')]
             ),
-        ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '160%'})
-    ], style={'marginLeft': "330px"})
+        ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '80%'})
+    ], style={"display":"flex","alignItems":"center","justifyContent":"center","width":"160%","minWidth":"700px"})
 
 
 if __name__ == '__main__':
