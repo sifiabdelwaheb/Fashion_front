@@ -18,6 +18,11 @@ import io
 from scipy import misc
 import imageio
 import numpy as np
+import tensorflow as tf
+
+logger = logging.getLogger(__name__)
+
+
 logger = logging.getLogger(__name__)
 img = cv2.imread("https://jpeg.org/images/jpegxl-logo.png")
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -141,6 +146,28 @@ def url_to_image(url):
     return image
 
 
+def predict_image(value):
+    new_model = tf.keras.models.load_model('firstmodel.h5')
+
+    val = "{}".format(value)
+    ii = url_to_image(val)
+    lower_blue = np.array([0, 0, 0])
+    upper_blue = np.array([150, 150, 150])
+    gray_images = cv2.cvtColor(ii, cv2.COLOR_BGR2HSV)
+    gray_image = cv2.inRange(ii, lower_blue, upper_blue)
+    width = int(28)
+    height = int(28)
+    dim = (width, height)
+    resized = cv2.resize(gray_image, dim, interpolation=cv2.INTER_AREA)
+    resized = resized.astype('float32') / 255
+    resized = resized.reshape(1, 28, 28, 1)
+    pred = new_model.predict(resized)
+
+    pred = np.argmax(pred, axis=1)
+
+    return pred
+
+
 @app.callback(
     dash.dependencies.Output('output-container-button', 'children'),
     [dash.dependencies.Input('button', 'n_clicks')],
@@ -152,17 +179,9 @@ def update_output(n_clicks, value):
         return ''
     else:
         val = "{}".format(value)
-        ii = url_to_image(val)
-        lower_blue = np.array([0, 0, 0])
-        upper_blue = np.array([112, 122, 120])
-        gray_images = cv2.cvtColor(ii, cv2.COLOR_BGR2HSV)
-        gray_image = cv2.inRange(ii, lower_blue, upper_blue)
-        width = int(28)
-        height = int(28)
-        dim = (width, height)
-        resized = cv2.resize(gray_image, dim, interpolation=cv2.INTER_AREA)
-        resized = resized.astype('float32') / 255
-        resized = resized.reshape(1, 28, 28, 1)
+
+        predict = predict_image(value)
+        logger.warning("the value of image", predict)
         return html.Div([
             dbc.Card([
 
@@ -171,11 +190,11 @@ def update_output(n_clicks, value):
                         html.Div(html.Img(src="{}".format(val), style={
                             'height': '40%', 'width': '40%'})),
 
-                        f" {resized.shape}"])
+                        f" {predict}"])
             ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '90%'}),
 
 
-            html.Hr()], style={"width": "100%", "minWidth": "1100px" })
+            html.Hr()], style={"width": "100%", "minWidth": "1100px"})
 
 
 @app.callback(Output('output-image-upload', 'children'),
@@ -194,27 +213,33 @@ def update_output1(list_of_contents, list_of_names, list_of_dates):
 @app.callback(
     Output(component_id='body-div', component_property='children'),
     [Input(component_id='show-secret', component_property='n_clicks')]
+
 )
+
+
+
 def update_output(n_clicks):
+    new_model = tf.keras.models.load_model('firstmodel.h5')
     ii = cv2.imread("test11.png")
     lower_blue = np.array([0, 0, 0])
     upper_blue = np.array([112, 122, 120])
     gray_images = cv2.cvtColor(ii, cv2.COLOR_BGR2HSV)
 
     gray_image = cv2.inRange(gray_images, lower_blue, upper_blue)
-    print(gray_image.shape)
-    plt.imshow(gray_image, cmap='Greys')
+    
     width = int(28)
     height = int(28)
     dim = (width, height)
-    # resize image
     resized = cv2.resize(gray_image, dim, interpolation=cv2.INTER_AREA)
     resized = resized / 255.0
     image = resized.reshape(1, 28, 28, 1)
+    predictions = new_model.predict(image)
+    pred=np.argmax(predictions, axis=1)
+    pred=pred[0]
     if n_clicks is None:
         raise PreventUpdate
     else:
-        return f" {image.shape}"
+        return f" {pred}"
 
 
 def parse_contents(contents, filename, date):
