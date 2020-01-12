@@ -104,17 +104,17 @@ app.layout = html.Div(
                 dbc.Button("Predict", color="primary",
                            className="mr-1", id='button',
                            style={'borderRaduis': '30px', 'width': '14%',
-                                  'color': 'beige', 'fontSize': 18,
+                                  'color': 'beige', 'fontSize': 16,
                                   'marginBottom': 12,
-                                  'marginLeft': '120px',
+                                  'marginLeft': '90px',
                                   'height': '40px',
                                   "fontWeight": 700}),
-                dbc.Button("Predict", color="primary",
+                dbc.Button("Predict&", color="primary",
                            className="mr-1", id='show-secret',
                            style={'borderRaduis': '30px', 'width': '14%',
-                                  'color': 'beige', 'fontSize': 18,
+                                  'color': 'beige', 'fontSize': 16,
                                   'marginBottom': 12,
-                                  'marginLeft': '120px',
+                                  'marginLeft': '40px',
                                   'height': '40px',
                                   "fontWeight": 700}),
 
@@ -147,25 +147,35 @@ def url_to_image(url):
     [dash.dependencies.State('input-box', 'value')],
 )
 def update_output(n_clicks, value):
-    val = "{}".format(value)
-    ii = url_to_image(val)
-    lower_blue = np.array([0, 0, 0])
-    upper_blue = np.array([112, 122, 120])
-    gray_images = cv2.cvtColor(ii, cv2.COLOR_BGR2HSV)
-    gray_image = cv2.inRange(ii, lower_blue, upper_blue)
-    width = int(28)
-    height = int(28)
-    dim = (width, height)
-    resized = cv2.resize(gray_image, dim, interpolation=cv2.INTER_AREA)
-    resized = resized.astype('float32') / 255
-    resized = resized.reshape(1, 28, 28, 1)
-    if (value == None or value == "unknown"):
+
+    if (value == None or value == "unknown" or value == ""):
         return ''
     else:
+        val = "{}".format(value)
+        ii = url_to_image(val)
+        lower_blue = np.array([0, 0, 0])
+        upper_blue = np.array([112, 122, 120])
+        gray_images = cv2.cvtColor(ii, cv2.COLOR_BGR2HSV)
+        gray_image = cv2.inRange(ii, lower_blue, upper_blue)
+        width = int(28)
+        height = int(28)
+        dim = (width, height)
+        resized = cv2.resize(gray_image, dim, interpolation=cv2.INTER_AREA)
+        resized = resized.astype('float32') / 255
+        resized = resized.reshape(1, 28, 28, 1)
         return html.Div([
-            html.Img(src="{}".format(val)),
-            f" {resized.shape}",
-            html.Hr()])
+            dbc.Card([
+
+                dbc.CardBody(
+                    [
+                        html.Div(html.Img(src="{}".format(val), style={
+                            'height': '40%', 'width': '40%'})),
+
+                        f" {resized.shape}"])
+            ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '90%'}),
+
+
+            html.Hr()], style={"width": "100%", "minWidth": "1100px" })
 
 
 @app.callback(Output('output-image-upload', 'children'),
@@ -217,12 +227,14 @@ def parse_contents(contents, filename, date):
         dbc.Card([
             dbc.CardHeader(filename, className="card-title"),
             dbc.CardBody(
-                [html.Img(src=contents),
+                [
+                    html.Div(html.Img(src=contents, style={
+                             'height': '40%', 'width': '40%'})),
                  html.H5("Image Class:"),
                  html.Div(id='body-div')]
             ),
         ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '80%'})
-    ], style={"display": "flex", "alignItems": "center", "justifyContent": "center", "width": "160%", "minWidth": "700px"})
+    ], style={"width": "100%", "minWidth": "1200px"})
 
 
 if __name__ == '__main__':
