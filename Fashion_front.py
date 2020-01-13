@@ -138,6 +138,22 @@ app.layout = html.Div(
 
 # METHOD #1: OpenCV, NumPy, and urllib
 
+def numbers_to_class(argument): 
+    switcher = { 
+        0: "T-shirt/top", 
+        1: "Trouser", 
+        2: "Pullover", 
+        3:"Dress",
+        4:"Coat",
+        5:"Sandal",
+        6:"Shirt",
+        7:"Sneaker",
+        8:"Bag",
+        9:"Ankle boot"
+    } 
+    return switcher.get(argument)
+
+
 
 def url_to_image(url):
     resp = urlopen(url)
@@ -181,7 +197,8 @@ def update_output(n_clicks, value):
         val = "{}".format(value)
 
         predict = predict_image(value)
-        logger.warning("the value of image", predict)
+        pred = predict[0]
+        pred=numbers_to_class(pred)
         return html.Div([
             dbc.Card([
 
@@ -190,7 +207,7 @@ def update_output(n_clicks, value):
                         html.Div(html.Img(src="{}".format(val), style={
                             'height': '40%', 'width': '40%'})),
 
-                        f" {predict}"])
+                        f" {pred}"])
             ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '90%'}),
 
 
@@ -215,9 +232,6 @@ def update_output1(list_of_contents, list_of_names, list_of_dates):
     [Input(component_id='show-secret', component_property='n_clicks')]
 
 )
-
-
-
 def update_output(n_clicks):
     new_model = tf.keras.models.load_model('firstmodel.h5')
     ii = cv2.imread("test11.png")
@@ -226,7 +240,7 @@ def update_output(n_clicks):
     gray_images = cv2.cvtColor(ii, cv2.COLOR_BGR2HSV)
 
     gray_image = cv2.inRange(gray_images, lower_blue, upper_blue)
-    
+
     width = int(28)
     height = int(28)
     dim = (width, height)
@@ -234,8 +248,10 @@ def update_output(n_clicks):
     resized = resized / 255.0
     image = resized.reshape(1, 28, 28, 1)
     predictions = new_model.predict(image)
-    pred=np.argmax(predictions, axis=1)
-    pred=pred[0]
+    pred = np.argmax(predictions, axis=1)
+    pred = pred[0]
+    pred=numbers_to_class(pred)
+
     if n_clicks is None:
         raise PreventUpdate
     else:
@@ -259,7 +275,7 @@ def parse_contents(contents, filename, date):
                  html.Div(id='body-div')]
             ),
         ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '80%'})
-    ], style={"width": "100%", "minWidth": "1200px"})
+    ], style={"width": "100%", "minWidth": "1245px"})
 
 
 if __name__ == '__main__':
