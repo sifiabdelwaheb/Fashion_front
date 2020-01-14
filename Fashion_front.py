@@ -28,7 +28,7 @@ img = cv2.imread("https://jpeg.org/images/jpegxl-logo.png")
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
+PLOTLY_LOGO = "http://dslv9ilpbe7p1.cloudfront.net/8V5JLcdly3Zl_55kbC6H2g_store_banner_image.jpeg"
 search_bar = dbc.Row(
     [
         dbc.Col(dbc.Input(type="search", placeholder="Search")),
@@ -50,9 +50,10 @@ navbar = dbc.Navbar(
             # Use row and col to control vertical alignment of logo / brand
             dbc.Row(
                 [
-                    dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
+                    dbc.Col(html.Img(src=PLOTLY_LOGO, style={
+                            'height': '70px', 'borderRadius': '120px', 'width': '70px'})),
                     dbc.Col(dbc.NavbarBrand(
-                        " Fashion image", className="ml-2")),
+                        " Fashion image", className="ml-4")),
                 ],
                 align="center",
                 no_gutters=True,
@@ -61,7 +62,7 @@ navbar = dbc.Navbar(
         dbc.NavbarToggler(id="navbar-toggler"),
 
     ],
-    color="dark",
+    color="primary",
     dark=True,
 )
 
@@ -83,6 +84,14 @@ app.layout = html.Div(
 
                 html.Div(dbc.Input(id='input-box', type='text', placeholder="Enter your Image Url",
                                    style={'color': 'blue', 'fontSize': '14px', 'marginBottom': 12, 'width': '110%', 'marginRight': '30px', })),
+                dbc.Button("Predict", color="primary",
+                           className="mr-1", id='button',
+                           style={'borderRaduis': '30px', 'width': '14%',
+                                  'color': 'beige', 'fontSize': 16,
+                                  'marginBottom': 12,
+                                  'marginLeft': '90px',
+                                  'height': '40px',
+                                  "fontWeight": 700}),
                 badges,
 
                 dcc.Upload(
@@ -106,14 +115,7 @@ app.layout = html.Div(
                     # Allow multiple files to be uploaded
                     multiple=True
                 ),
-                dbc.Button("Predict", color="primary",
-                           className="mr-1", id='button',
-                           style={'borderRaduis': '30px', 'width': '14%',
-                                  'color': 'beige', 'fontSize': 16,
-                                  'marginBottom': 12,
-                                  'marginLeft': '90px',
-                                  'height': '40px',
-                                  "fontWeight": 700}),
+
                 dbc.Button("Predict&", color="primary",
                            className="mr-1", id='show-secret',
                            style={'borderRaduis': '30px', 'width': '14%',
@@ -138,21 +140,21 @@ app.layout = html.Div(
 
 # METHOD #1: OpenCV, NumPy, and urllib
 
-def numbers_to_class(argument): 
-    switcher = { 
-        0: "T-shirt/top", 
-        1: "Trouser", 
-        2: "Pullover", 
-        3:"Dress",
-        4:"Coat",
-        5:"Sandal",
-        6:"Shirt",
-        7:"Sneaker",
-        8:"Bag",
-        9:"Ankle boot"
-    } 
-    return switcher.get(argument)
 
+def numbers_to_class(argument):
+    switcher = {
+        0: "T-shirt/top",
+        1: "Trouser",
+        2: "Pullover",
+        3: "Dress",
+        4: "Coat",
+        5: "Sandal",
+        6: "Shirt",
+        7: "Sneaker",
+        8: "Bag",
+        9: "Ankle boot"
+    }
+    return switcher.get(argument)
 
 
 def url_to_image(url):
@@ -198,20 +200,27 @@ def update_output(n_clicks, value):
 
         predict = predict_image(value)
         pred = predict[0]
-        pred=numbers_to_class(pred)
+        pred = numbers_to_class(pred)
+        
         return html.Div([
+            
             dbc.Card([
-
-                dbc.CardBody(
+                 dbc.CardBody(
+                dbc.Row(
                     [
-                        html.Div(html.Img(src="{}".format(val), style={
-                            'height': '40%', 'width': '40%'})),
+                        dbc.Col(html.Div(html.Img(src="{}".format(val), style={
+                            'height': '70%', 'width': '70%'}))),
+                        dbc.Col(html.H1(f" {pred}")),
+                    ],
+                    align="center",
+                  
+                )),
 
-                        f" {pred}"])
+               
             ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '90%'}),
 
 
-            html.Hr()], style={"width": "100%", "minWidth": "1100px"})
+            html.Hr()], style={"width": "100%", "minWidth": "1130px"})
 
 
 @app.callback(Output('output-image-upload', 'children'),
@@ -250,7 +259,7 @@ def update_output(n_clicks):
     predictions = new_model.predict(image)
     pred = np.argmax(predictions, axis=1)
     pred = pred[0]
-    pred=numbers_to_class(pred)
+    pred = numbers_to_class(pred)
 
     if n_clicks is None:
         raise PreventUpdate
