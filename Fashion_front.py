@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
 PLOTLY_LOGO = "http://dslv9ilpbe7p1.cloudfront.net/8V5JLcdly3Zl_55kbC6H2g_store_banner_image.jpeg"
 search_bar = dbc.Row(
     [
@@ -46,48 +47,43 @@ navbar = dbc.Navbar(
             # Use row and col to control vertical alignment of logo / brand
             dbc.Row(
                 [
-                    dbc.Col(html.Img(src=PLOTLY_LOGO, style={
-                            'height': '70px', 'borderRadius': '120px', 'width': '70px'})),
+                    dbc.Col(html.Img(src=PLOTLY_LOGO, className='img_header')),
                     dbc.Col(dbc.NavbarBrand(
-                        " Fashion image", className="ml-4")),
+                        " Fashion image", className="ml-4 header_title")),
                 ],
                 align="center",
                 no_gutters=True,
             ),
         ),
-        dbc.NavbarToggler(id="navbar-toggler"),
 
     ],
     color="primary",
     dark=True,
+    className='header'
 )
 
 badges = html.Span(
     [
         dbc.Badge("or choose with", pill=True,
-                  color="light", className="mr-1"),
-
-    ], style={'marginLeft': '30px', 'fontSize': '22px', 'marginRight': '30px'}
+                  color="light", className="mr-1"), ], className='badges'
 )
+
+cap = cv2.VideoCapture(0)
+
 app.layout = html.Div(
     [
         navbar,
 
         html.Div([
-            html.Div('Predict Fashion image with CNN ', style={
-                 'color': '#151313', 'fontSize': 20, "fontWeight": 1000, 'marginBottom': 12}),
+            html.Div('Predict Fashion image with CNN ',
+                     className='desciption_title'),
             dbc.Row([
 
                 html.Div(dbc.Input(id='input-box', type='text', placeholder="Enter your Image Url",
-                                   style={'color': 'blue', 'fontSize': '14px',  'width': '110%',})),
+                                   className='Input')),
                 dbc.Button("Predict", color="primary",
-                           className="mr-1", id='button',
-                           style={'borderRaduis': '30px', 'width': '14%',
-                                  'color': 'beige', 'fontSize': 16,
-                                  
-                                  'marginLeft': '90px',
-                                  'height': '40px',
-                                  "fontWeight": 700}),
+                           className="mr-1 button", id='button',
+                           ),
                 badges,
 
                 dcc.Upload(
@@ -96,33 +92,16 @@ app.layout = html.Div(
                         'Upload Image ',
 
                     ]),
-                    style={
-                        'width': '120%',
-                        'height': '40px',
-                        'borderWidth': '2px',
-                        'borderStyle': 'dashed',
-                        'borderRadius': '5px',
-                        'textAlign': 'center',
-                        'padding': '3px',
-                        'marginRight': '40px',
-                        'cursor': 'pointer'
-                    },
+                    className='upload_img',
 
                     # Allow multiple files to be uploaded
                     multiple=True
                 ),
 
                 dbc.Button("Predict&", color="primary",
-                           className="mr-1", id='show-secret',
-                           style={'borderRaduis': '30px', 'width': '14%',
-                                  'color': 'beige', 'fontSize': 16,
-                                 
-                                  'marginLeft': '90px',
-                                  'height': '40px',
-                                  "fontWeight": 700}),
-
-
-            ], style={"width": '100%', 'height': '100px', 'marginTop': '30px'}),
+                           className="mr-1 button", id='show-secret',
+                           ),
+            ],className='test'),
 
             dbc.Row([
                 html.Div(id='output-container-button'),
@@ -130,7 +109,7 @@ app.layout = html.Div(
             html.Div(id='body-div')
 
 
-        ], style={'marginTop': 40, 'marginLeft': "10%"})
+        ], className='container_layout')
 
     ])
 
@@ -197,27 +176,19 @@ def update_output(n_clicks, value):
         predict = predict_image(value)
         pred = predict[0]
         pred = numbers_to_class(pred)
-        
+
         return html.Div([
-            
             dbc.Card([
-                 dbc.CardBody(
-                dbc.Row(
-                    [
-                        dbc.Col(html.Div(html.Img(src="{}".format(val), style={
-                            'height': '240px', 'width': '300px'}))),
-                        dbc.Col(html.H1(f" {pred}")),
-                    ],
-                    align="center",
-                    
-                  
-                )),
-
-               
-            ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '100%'}),
+                dbc.CardBody(
+                    dbc.Row(
+                        [dbc.Col(html.Div(html.Img(src="{}".format(val), className='img_upload_url'))),
+                         dbc.Col(html.H1(f" {pred}")),
+                         ],
+                        align="center",
+                    )), ], className='Card'),
 
 
-            html.Hr()], style={"width": "70%", "minWidth": "1000px","marginLeft":20})
+            html.Hr()], className='container_predict')
 
 
 @app.callback(Output('output-image-upload', 'children'),
@@ -257,7 +228,7 @@ def update_output3(n_clicks):
     pred = np.argmax(predictions, axis=1)
     pred = pred[0]
     pred = numbers_to_class(pred)
-    
+
     if n_clicks is None:
         raise PreventUpdate
     else:
@@ -271,25 +242,19 @@ def parse_contents(contents, filename, date):
     img = Image.open(io.BytesIO(image))
     img.save("test11.png", 'png')
     return html.Div([
-          
-           
         dbc.Card([
-           
+
             dbc.CardBody(
-                 dbc.Row(
+                dbc.Row(
                     [
-                    html.Div(html.Img(src=contents, style={
-                            'height': '250px', 'width': '300px','marginRight':'220px'})),
-                 
-                 html.H1(id='body-div')],
-                 align="center",
-                  
+                        html.Div(
+                            html.Img(src=contents, className='img_upload_pred')), html.H1(id='body-div')],
+                    align="center",
+
                 )),
-                 
-               
-            
-        ], style={'boxShadow': '0 8px 8px 0 rgba(0,0,0,0.2)', "width": '100%'})
-    ], style={"width": "70%", "minWidth": "1000px","marginLeft":20})
+
+        ], className='Card')
+    ], className='container_predict')
 
 
 if __name__ == '__main__':
